@@ -3,16 +3,15 @@
 namespace Laragear\ApiManager;
 
 use Illuminate\Http\Client\PendingRequest;
-use JetBrains\PhpStorm\ArrayShape;
+use function app;
 
 abstract class ApiServer
 {
     /**
      * The headers to include in each request.
      *
-     * @var array{string:string}
+     * @var array{string:string}|array
      */
-    #[ArrayShape(["string", "string"])]
     public array $headers = [];
 
     /**
@@ -25,9 +24,8 @@ abstract class ApiServer
     /**
      * The list of simple actions for this API.
      *
-     * @var array{string:string}
+     * @var array{string:string}|array{}
      */
-    #[ArrayShape(["string", "string"])]
     public array $actions = [];
 
     /**
@@ -55,7 +53,6 @@ abstract class ApiServer
      *
      * @return array{string,string}|void
      */
-    #[ArrayShape(["string", "string"])]
     public function authBasic()
     {
         //
@@ -68,7 +65,6 @@ abstract class ApiServer
      *
      * @return array{string,string}|void
      */
-    #[ArrayShape(["string", "string"])]
     public function authDigest()
     {
         //
@@ -85,17 +81,6 @@ abstract class ApiServer
     }
 
     /**
-     * Registers the current API Server in the API Manager.
-     *
-     * @param  string|null  $name
-     * @return void
-     */
-    public static function registerInApiManager(string $name = null): void
-    {
-        app(ApiManager::class)->register(static::class, $name);
-    }
-
-    /**
      * Returns the API Server implementation.
      *
      * @param  array  $parameters
@@ -103,6 +88,12 @@ abstract class ApiServer
      */
     public static function api(array $parameters = []): ApiRequestProxy
     {
-        return app(ApiManager::class)->server($parameters);
+        $proxy = app(ApiRequestProxy::class, ['api' => app(static::class)]);
+
+        if ($parameters) {
+            $proxy->withUrlParameters($parameters);
+        }
+
+        return $proxy;
     }
 }

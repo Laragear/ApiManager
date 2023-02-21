@@ -20,17 +20,4 @@ abstract class TestCase extends BaseTestCase
             ApiManagerServiceProvider::class,
         ];
     }
-
-    /**
-     * Override application aliases.
-     *
-     * @param  \Illuminate\Foundation\Application  $app
-     * @return array
-     */
-    protected function getPackageAliases($app)
-    {
-        return [
-            'Api' => Api::class,
-        ];
-    }
 }

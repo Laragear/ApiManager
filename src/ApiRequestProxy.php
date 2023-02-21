@@ -45,9 +45,8 @@ class ApiRequestProxy
      *
      * @param  \Laragear\ApiManager\ApiServer  $api
      * @param  \Illuminate\Http\Client\Factory  $requestFactory
-     * @param  string  $name
      */
-    public function __construct(protected Factory $requestFactory, public ApiServer $api, public string $name)
+    public function __construct(protected Factory $requestFactory, public ApiServer $api)
     {
         if (!$this->api->getBaseUrl()) {
             // @codeCoverageIgnoreStart
@@ -100,7 +99,7 @@ class ApiRequestProxy
     public function on(Pool $pool, string $as = null): static
     {
         // We will have to retrieve by force the pool values.
-        $handler = (new ReflectionProperty($pool, 'handler'))->getValue($pool);
+        $handler = tap((new ReflectionProperty($pool, 'handler')))->setAccessible(true)->getValue($pool);
         $requests = (new ReflectionProperty($pool, 'pool'));
 
         $request = $this->buildApiRequest()->setHandler($handler)->async();
@@ -108,7 +107,7 @@ class ApiRequestProxy
         // If it's using a name, set it here.
         $value = $as ? [$as => $request] : [$request];
 
-        $requests->setValue($pool, array_merge($requests->getValue($pool), $value));
+        $requests->setValue($pool, array_merge(tap($requests)->setAccessible(true)->getValue($pool), $value));
 
         return $this;
     }

@@ -8,36 +8,24 @@ use Illuminate\Http\Client\PendingRequest;
 use Illuminate\Http\Client\Pool;
 use Illuminate\Http\Client\Request;
 use Illuminate\Support\Facades\Http;
-use InvalidArgumentException;
 use Laragear\ApiManager\ApiServer;
-use Laragear\ApiManager\Facades\Api;
+use LogicException;
 
 class ApiRequestProxyTest extends TestCase
 {
-    protected function setUp(): void
-    {
-        parent::setUp();
-
-        TestActionApiServer::registerInApiManager('test');
-    }
-
     public function test_throws_when_api_has_empty_base_url(): void
     {
-        Api::register(TestEmptyApiUrlServer::class);
+        $this->expectException(LogicException::class);
+        $this->expectExceptionMessage('There is no base URL for this [TestEmptyApiUrlServer] API.');
 
-        $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage('The [invalid] server is not registered.');
-
-        Api::server('invalid');
+        TestEmptyApiUrlServer::api();
     }
 
     public function test_use_api_properties_to_build_request(): void
     {
         Http::fake();
 
-        Api::register(TestPropertiesApiServer::class, 'test');
-
-        Api::server('test')
+        TestPropertiesApiServer::api()
             ->beforeSending(function (Request $request, $options) {
                 static::assertSame(10, $options['timeout']);
             })
@@ -56,7 +44,7 @@ class ApiRequestProxyTest extends TestCase
     {
         Http::fake();
 
-        Api::server('test')->get('example');
+        TestActionApiServer::api()->get('example');
 
         Http::assertSent(static function (Request $request): bool {
             static::assertSame('https://www.test.com/example', $request->url());
@@ -71,9 +59,7 @@ class ApiRequestProxyTest extends TestCase
     {
         Http::fake();
 
-        Api::register(TestBuildApiServer::class, 'test');
-
-        Api::server('test')->get('example');
+        TestBuildApiServer::api()->get('example');
 
         Http::assertSent(static function (Request $request): bool {
             static::assertSame('https://www.not-test.com/example', $request->url());
@@ -88,7 +74,7 @@ class ApiRequestProxyTest extends TestCase
     {
         Http::fake();
 
-        Api::server('test')->foo();
+        TestActionApiServer::api()->foo();
 
         Http::assertSent(static function (Request $request): bool {
             static::assertSame('GET', $request->method());
@@ -101,7 +87,7 @@ class ApiRequestProxyTest extends TestCase
     {
         Http::fake();
 
-        Api::server('test')->bar();
+        TestActionApiServer::api()->bar();
 
         Http::assertSent(static function (Request $request): bool {
             static::assertSame('GET', $request->method());
@@ -114,7 +100,7 @@ class ApiRequestProxyTest extends TestCase
     {
         Http::fake();
 
-        Api::server('test')->bazQuz();
+        TestActionApiServer::api()->bazQuz();
 
         Http::assertSent(static function (Request $request): bool {
             static::assertSame('https://www.test.com/baz/quz', $request->url());
@@ -126,7 +112,7 @@ class ApiRequestProxyTest extends TestCase
     {
         Http::fake();
 
-        Api::server('test')->bazQuz();
+        TestActionApiServer::api()->bazQuz();
 
         Http::assertSent(static function (Request $request): bool {
             static::assertSame('POST', $request->method());
@@ -139,7 +125,7 @@ class ApiRequestProxyTest extends TestCase
     {
         Http::fake();
 
-        Api::server('test', ['id' => 10])->parameter();
+        TestActionApiServer::api(['id' => 10])->parameter();
 
         Http::assertSent(static function (Request $request): bool {
             static::assertSame('POST', $request->method());
@@ -152,7 +138,7 @@ class ApiRequestProxyTest extends TestCase
     {
         Http::fake();
 
-        $request = Api::server('test')->hacky();
+        $request = TestActionApiServer::api()->hacky();
 
         $request->get('test');
 
@@ -168,14 +154,14 @@ class ApiRequestProxyTest extends TestCase
         $this->expectException(BadMethodCallException::class);
         $this->expectExceptionMessage('Method Illuminate\Http\Client\PendingRequest::invalid does not exist.');
 
-        Api::server('test')->invalid();
+        TestActionApiServer::api()->invalid();
     }
 
     public function test_builds_on_action_method_with_parameters(): void
     {
         Http::fake();
 
-        $request = Api::server('test')->override('test');
+        $request = TestActionApiServer::api()->override('test');
 
         static::assertSame('test', $request);
 
@@ -186,7 +172,7 @@ class ApiRequestProxyTest extends TestCase
     {
         Http::fake();
 
-        Api::server('test')->setBaseUrl('www.google.com')->get('test');
+        TestActionApiServer::api()->setBaseUrl('www.google.com')->get('test');
 
         Http::assertSent(static function (Request $request): bool {
             static::assertSame('GET', $request->method());
@@ -199,7 +185,7 @@ class ApiRequestProxyTest extends TestCase
     {
         Http::fake();
 
-        $result = Api::server('test')->asProperty;
+        $result = TestActionApiServer::api()->asProperty;
 
         static::assertSame('as property', $result);
     }
@@ -209,14 +195,14 @@ class ApiRequestProxyTest extends TestCase
         $this->expectException(ErrorException::class);
         $this->expectExceptionMessage('Undefined property: Tests\TestActionApiServer::$badProperty');
 
-        Api::server('test')->badProperty;
+        TestActionApiServer::api()->badProperty;
     }
 
     public function test_forwards_properties_to_api_server_inline_action(): void
     {
         Http::fake();
 
-        Api::server('test')->foo;
+        TestActionApiServer::api()->foo;
 
         Http::assertSent(static function (Request $request): bool {
             static::assertSame('GET', $request->method());
@@ -229,9 +215,7 @@ class ApiRequestProxyTest extends TestCase
     {
         Http::fake();
 
-        Api::register(TestAuthApiServer::class, 'auth');
-
-        Api::server('auth')->useAuth('basic')->get('test');
+        TestAuthApiServer::api()->useAuth('basic')->get('test');
 
         Http::assertSent(static function (Request $request): bool {
             static::assertSame(['Basic Zm9vOmJhcg=='], $request->header('Authorization'));
@@ -244,9 +228,7 @@ class ApiRequestProxyTest extends TestCase
     {
         Http::fake();
 
-        Api::register(TestAuthApiServer::class, 'auth');
-
-        Api::server('auth')->useAuth('digest')->beforeSending(static function (Request $request, array $options): void {
+        TestAuthApiServer::api()->useAuth('digest')->beforeSending(static function (Request $request, array $options): void {
             static::assertSame(['baz', 'quz', 'digest'], $options['auth']);
         })->get('test');
 
@@ -257,9 +239,7 @@ class ApiRequestProxyTest extends TestCase
     {
         Http::fake();
 
-        Api::register(TestAuthApiServer::class, 'auth');
-
-        Api::server('auth')->useAuth('token')->get('test');
+        TestAuthApiServer::api()->useAuth('token')->get('test');
 
         Http::assertSent(static function (Request $request): bool {
             static::assertSame(['Bearer qux'], $request->header('Authorization'));
@@ -277,9 +257,9 @@ class ApiRequestProxyTest extends TestCase
         ]);
 
         $responses = Http::pool(static fn (Pool $pool): array => [
-            Api::server('test')->on($pool)->get('200'),
-            Api::server('test')->on($pool)->get('400'),
-            Api::server('test')->on($pool)->get('500'),
+            TestActionApiServer::api()->on($pool)->get('200'),
+            TestActionApiServer::api()->on($pool)->get('400'),
+            TestActionApiServer::api()->on($pool)->get('500'),
         ]);
 
         static::assertSame(200, $responses[0]->status());
@@ -296,9 +276,9 @@ class ApiRequestProxyTest extends TestCase
         ]);
 
         $responses = Http::pool(static fn (Pool $pool): array => [
-            Api::server('test')->on($pool, 'foo')->get('200'),
-            Api::server('test')->on($pool, 'bar')->get('400'),
-            Api::server('test')->on($pool, 'quz')->get('500'),
+            TestActionApiServer::api()->on($pool, 'foo')->get('200'),
+            TestActionApiServer::api()->on($pool, 'bar')->get('400'),
+            TestActionApiServer::api()->on($pool, 'quz')->get('500'),
         ]);
 
         static::assertSame(200, $responses['foo']->status());

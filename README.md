@@ -1,17 +1,17 @@
 # Api Manager
 [![Latest Version on Packagist](https://img.shields.io/packagist/v/laragear/api-manager.svg)](https://packagist.org/packages/laragear/api-manager)
 [![Latest stable test run](https://github.com/Laragear/ApiManager/workflows/Tests/badge.svg)](https://github.com/Laragear/ApiManager/actions)
-[![Codecov coverage](https://codecov.io/gh/Laragear/ApiManager/branch/1.x/graph/badge.svg?token=DPGO1BDJCJ)](https://codecov.io/gh/Laragear/ApiManager)
-[![Maintainability](https://api.codeclimate.com/v1/badges/89a650b00897b4a87a52/maintainability)](https://codeclimate.com/github/Laragear/ApiManager/maintainability)
+[![Codecov coverage](https://codecov.io/gh/Laragear/ApiManager/branch/1.x/graph/badge.svg?token=V726ud0ss6)](https://codecov.io/gh/Laragear/ApiManager)
+[![Maintainability](https://api.codeclimate.com/v1/badges/62cbbc29179121baad6a/maintainability)](https://codeclimate.com/github/Laragear/ApiManager/maintainability)
 [![Sonarcloud Status](https://sonarcloud.io/api/project_badges/measure?project=Laragear_ApiManager&metric=alert_status)](https://sonarcloud.io/dashboard?id=Laragear_ApiManager)
 [![Laravel Octane Compatibility](https://img.shields.io/badge/Laravel%20Octane-Compatible-success?style=flat&logo=laravel)](https://laravel.com/docs/10.x/octane#introduction)
 
-Manage multiple REST servers to make requests in few lines and fluently. No more verbose HTTP Requests! 
+Manage multiple REST servers to make requests in few lines and fluently. No more verbose HTTP Requests!
 
 ```php
-use Laragear\ApiManager\Facades\Api;
+use App\Http\Apis\Chirper;
 
-$chirp = Api::chirper()->chirp('Hello world!');
+$chirp = Chirper::api()->chirp('Hello world!');
 ```
 
 ## Become a sponsor
@@ -35,6 +35,8 @@ composer require laragear/api-manager
 
 ## Usage
 
+### Creating an API Server
+
 To make use of an API server, define a class that extends `Laragear\ApiManager\ApiServer`. You may use the `make:api` Artisan command to make a ready-made stub in the `app\Http\Apis` directory.
 
 ```shell
@@ -53,7 +55,7 @@ class Chirper extends ApiServer
     /**
      * The headers to include in each request.
      *
-     * @var array{string:string}
+     * @var array{string:string}|array
      */
     public array $headers = [
         // ...
@@ -94,34 +96,8 @@ class Chirper extends ApiServer
 ```
 
 > **Note**
-> 
+>
 > You can override the API Server stub creating one in `stubs/api.stub`.
-
-Then, in your `app\Providers\AppServiceProvider.php` you can add the API Server using the `registerInApiManager()` method of your API class. It will use the _camelCase_ name of the class, but you're free to change the name to whatever you want.
-
-```php
-use Laragear\ApiManager\Facades\Api;
-use App\Http\Apis\Chirper;
-use App\Http\Apis\Facebook;
-
-public function register()
-{
-    // Simply registers it as `chirper`...
-    Chirper::registerInApiManager();
-    
-    // ...or use the API Manager to save it with a custom name.
-    Facebook::registerInApiManager('the zuck');
-}
-```
-
-From there, you can further define how you will interact with your API. The most convenient way to do requests is to use the `api()` method of the API Server, which will grant you with code completion (intellisense) from your favorite IDE for [method actions](#method-actions), or with some help of PHPDocs.
-
-```php
-use Laragear\ApiManager\Facades\Api;
-use App\Http\Apis\Chirper;
-
-$chirper = Chirper::api();
-```
 
 ### Inline Actions
 
@@ -187,7 +163,7 @@ use App\Http\Apis\Chirper;
 $latestChirps = Chirper::api()->latest;
 ```
 
-#### Method actions
+### Method actions
 
 For more complex scenarios, you may use a class methods. Just be sure to type-hint the `PendingRequest` as first parameter if you need to customize the request.
 
@@ -214,13 +190,15 @@ $chirp = Chirper::api()->newChirp('Easy peasy');
 ```
 
 > **Note**
-> 
+>
 > Method actions take precedence over inline actions.
 
 As with inline actions, method actions can be also executed as it where properties if these don't require arguments.
 
 ```php
-$latest = Api::chirper()->noReply->newChirp('Easy peasy');
+use App\Http\Apis\Chirper;
+
+$latest = Chirper::api()->noReply->newChirp('Easy peasy');
 ```
 
 ### Authentication
@@ -255,7 +233,7 @@ public function build(PendingRequest $request)
 ```
 
 > **Note**
-> 
+>
 > The `build()` method is executed after the base URL, headers, and authentication, is built.
 
 ### Overriding a request
@@ -270,11 +248,11 @@ $chirp = Chirper::api()->timeout(5)->latest();
 
 > **Note**
 >
-> If the method exists in your API Class, it will take precedence. 
+> If the method exists in your API Class, it will take precedence.
 
 ### Dependency Injection
 
-You can add any service you need in the class constructor of your API. The class will be resolved using the Service Container.
+All API Servers are resolved using the Service Container, so you can add any service you need to inject in your object through the constructor.
 
 ```php
 use Illuminate\Filesystem\Filesystem;
@@ -293,9 +271,23 @@ class Chirper extends ApiServer
 }
 ```
 
+You can also create a callback to resolve your API Server in your `AppServiceProvider` if you need more deep customization to create it.
+
+```php
+// app\Providers\AppServiceProvider.php
+use App\Http\Apis\Chirper;
+
+public function register()
+{
+    $this->app->bind(Chirper::class, function () {
+       return new Chirper(config('services.chirper.version'));
+    })
+}
+```
+
 ### Concurrent Requests
 
-To add an API Server Request to a pool, use the `onPool()` method for each concurrent request. There is no need to make all requests to the same API server, as you can mix and match different destinations. 
+To add an API Server Request to a pool, use the `onPool()` method for each concurrent request. There is no need to make all requests to the same API server, as you can mix and match different destinations.
 
 ```php
 use Illuminate\Support\Facades\Http;
@@ -325,6 +317,28 @@ $responses = Http::pool(fn ($pool) => [
 ]);
  
 return $responses['first']->ok();
+```
+
+## Testing
+
+You can easily test if an API Server action works or not by using the `fake()` method of the HTTP facade.
+
+```php
+use Illuminate\Support\Facades\Http;
+use Illuminate\Http\Client\Request;
+
+public function test_creates_new_chirp(): void
+{
+    Http::fake(function (Request $request) {
+        return Http::response([
+            'posted' => 'ok', 
+            ...json_decode($request->body())
+        ], 200);
+    });
+    
+    $this->post('spread-message', ['message' => 'Hello world!'])
+        ->assertSee('Posted!');
+}
 ```
 
 ## Laravel Octane Compatibility

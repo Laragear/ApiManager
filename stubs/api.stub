@@ -9,7 +9,7 @@ class DummyClass extends ApiServer
     /**
      * The headers to include in each request.
      *
-     * @var array{string:string}
+     * @var array|array{string:string}
      */
     public array $headers = [
         // ...

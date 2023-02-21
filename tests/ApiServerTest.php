@@ -3,23 +3,14 @@
 namespace Tests;
 
 use Laragear\ApiManager\ApiServer;
-use Laragear\ApiManager\Facades\Api as ApiFacade;
 
 class ApiServerTest extends TestCase
 {
-    public function test_registers_itself(): void
+    public function test_builds_itself(): void
     {
-        TestSelfRegistrableApiServer::registerInApiManager();
-
-        static::assertTrue(ApiFacade::hasServer('testSelfRegistrableApiServer'));
+        static::assertInstanceOf(TestSelfRegistrableApiServer::class, TestSelfRegistrableApiServer::api()->api);
     }
 
-    public function test_registers_itself_with_name(): void
-    {
-        TestSelfRegistrableApiServer::registerInApiManager('custom');
-
-        static::assertSame('custom', ApiFacade::server('custom')->name);
-    }
 }
 
 class TestSelfRegistrableApiServer extends ApiServer
