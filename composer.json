@@ -1,0 +1,71 @@
+{
+    "name": "laragear/api-manager",
+    "description": "Manage multiple REST servers to make requests in few lines and fluently.",
+    "type": "library",
+    "license": "MIT",
+    "minimum-stability": "stable",
+    "prefer-stable": true,
+    "keywords": [
+        "laravel",
+        "http",
+        "client",
+        "api",
+        "rest"
+    ],
+    "authors": [
+        {
+            "name": "Italo Israel Baeza Cabrera",
+            "email": "darkghosthunter@gmail.com",
+            "homepage": "https://github.com/sponsors/DarkGhostHunter"
+        }
+    ],
+    "require": {
+        "php": "8.*",
+        "guzzlehttp/guzzle": "^7.5.0",
+        "illuminate/http": "9.*|10.*",
+        "illuminate/config": "9.*|10.*",
+        "illuminate/container": "9.*|10.*",
+        "illuminate/support": "9.*|10.*"
+    },
+    "require-dev": {
+        "orchestra/testbench": "^7.22|8.*",
+        "jetbrains/phpstorm-attributes": "*"
+    },
+    "autoload": {
+        "psr-4": {
+            "Laragear\\ApiManager\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Tests\\": "tests/"
+        }
+    },
+    "scripts": {
+        "test": "vendor/bin/phpunit --coverage-clover build/logs/clover.xml",
+        "test-coverage": "vendor/bin/phpunit --coverage-html coverage"
+    },
+    "config": {
+        "sort-packages": true
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Laragear\\ApiManager\\ApiManagerServiceProvider"
+            ],
+            "aliases": {
+                "Preload": "Laragear\\ApiManager\\Facades\\Api"
+            }
+        }
+    },
+    "funding": [
+        {
+            "type": "Github Sponsors",
+            "url": "https://github.com/sponsors/DarkGhostHunter"
+        },
+        {
+            "type": "Paypal",
+            "url": "https://paypal.me/darkghosthunter"
+        }
+    ]
+}

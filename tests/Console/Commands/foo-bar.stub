@@ -1,0 +1,49 @@
+<?php
+
+namespace App\Http\Apis;
+
+use Laragear\ApiManager\ApiServer;
+
+class FooBar extends ApiServer
+{
+    /**
+     * The headers to include in each request.
+     *
+     * @var array{string:string}
+     */
+    public array $headers = [
+        // ...
+    ];
+
+    /**
+     * The list of simple actions for this API.
+     *
+     * @var array|string[]
+     */
+    public array $actions = [
+        'latest' => '/',
+        'create' => 'post:new',
+    ];
+
+    /**
+     * Returns the API base URL.
+     *
+     * @return string
+     */
+    abstract public function getBaseUrl(): string
+    {
+        return app()->isProduction()
+            ? 'https://foo-bar.com/api/v1'
+            : 'https://dev.foo-bar.com/api/v1';
+    }
+
+    /**
+     * Returns the Bearer Token used for authentication.
+     *
+     * @return string
+     */
+    protected function authToken(): string
+    {
+        return config('services.foo-bar.secret');
+    }
+}
