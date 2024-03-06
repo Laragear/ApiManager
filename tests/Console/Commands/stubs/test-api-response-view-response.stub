@@ -1,0 +1,10 @@
+<?php
+
+namespace App\Http\Apis\TestApi\Responses;
+
+use Illuminate\Http\Client\Response;
+
+class ViewResponse extends Response
+{
+    //
+}

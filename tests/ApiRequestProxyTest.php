@@ -10,10 +10,13 @@ use Illuminate\Http\Client\Request;
 use Illuminate\Support\Facades\Http;
 use Laragear\ApiManager\ApiServer;
 use LogicException;
+use PHPUnit\Framework\Attributes\Test;
+use function func_get_args;
 
 class ApiRequestProxyTest extends TestCase
 {
-    public function test_throws_when_api_has_empty_base_url(): void
+    #[Test]
+    public function throws_when_api_has_empty_base_url(): void
     {
         $this->expectException(LogicException::class);
         $this->expectExceptionMessage('There is no base URL for this [TestEmptyApiUrlServer] API.');
@@ -21,7 +24,8 @@ class ApiRequestProxyTest extends TestCase
         TestEmptyApiUrlServer::api();
     }
 
-    public function test_use_api_properties_to_build_request(): void
+    #[Test]
+    public function use_api_properties_to_build_request(): void
     {
         Http::fake();
 
@@ -40,7 +44,8 @@ class ApiRequestProxyTest extends TestCase
         });
     }
 
-    public function test_builds_default_request(): void
+    #[Test]
+    public function builds_default_request(): void
     {
         Http::fake();
 
@@ -55,7 +60,8 @@ class ApiRequestProxyTest extends TestCase
         });
     }
 
-    public function test_builds_custom_request(): void
+    #[Test]
+    public function builds_custom_request(): void
     {
         Http::fake();
 
@@ -70,7 +76,8 @@ class ApiRequestProxyTest extends TestCase
         });
     }
 
-    public function test_builds_on_inline_action_get(): void
+    #[Test]
+    public function builds_on_inline_action_get(): void
     {
         Http::fake();
 
@@ -83,7 +90,8 @@ class ApiRequestProxyTest extends TestCase
         });
     }
 
-    public function test_builds_on_inline_action_with_get_verb(): void
+    #[Test]
+    public function builds_on_inline_action_with_get_verb(): void
     {
         Http::fake();
 
@@ -96,7 +104,8 @@ class ApiRequestProxyTest extends TestCase
         });
     }
 
-    public function test_builds_on_inline_action_using_camel_case(): void
+    #[Test]
+    public function builds_on_inline_action_using_camel_case(): void
     {
         Http::fake();
 
@@ -108,7 +117,8 @@ class ApiRequestProxyTest extends TestCase
         });
     }
 
-    public function test_builds_on_inline_action_using_http_verb(): void
+    #[Test]
+    public function builds_on_inline_action_using_http_verb(): void
     {
         Http::fake();
 
@@ -121,7 +131,8 @@ class ApiRequestProxyTest extends TestCase
         });
     }
 
-    public function test_builds_on_inline_action_with_url_parameters(): void
+    #[Test]
+    public function builds_on_inline_action_with_url_parameters(): void
     {
         Http::fake();
 
@@ -134,7 +145,8 @@ class ApiRequestProxyTest extends TestCase
         });
     }
 
-    public function test_builds_on_inline_action_with_hacky_verb_and_path(): void
+    #[Test]
+    public function builds_on_inline_action_with_hacky_verb_and_path(): void
     {
         Http::fake();
 
@@ -149,7 +161,8 @@ class ApiRequestProxyTest extends TestCase
         });
     }
 
-    public function test_throws_when_method_doesnt_exist_in_pending_request(): void
+    #[Test]
+    public function throws_when_method_doesnt_exist_in_pending_request(): void
     {
         $this->expectException(BadMethodCallException::class);
         $this->expectExceptionMessage('Method Illuminate\Http\Client\PendingRequest::invalid does not exist.');
@@ -157,7 +170,8 @@ class ApiRequestProxyTest extends TestCase
         TestActionApiServer::api()->invalid();
     }
 
-    public function test_builds_on_action_method_with_parameters(): void
+    #[Test]
+    public function builds_on_action_method_with_parameters(): void
     {
         Http::fake();
 
@@ -168,7 +182,39 @@ class ApiRequestProxyTest extends TestCase
         Http::assertNothingSent();
     }
 
-    public function test_forwards_calls_to_the_request(): void
+    #[Test]
+    public function builds_on_action_method_with_pending_request_type_hinting(): void
+    {
+        Http::fake();
+
+        $response = TestActionApiServer::api()->requestFirst('foo', 'bar', 'baz');
+        static::assertInstanceOf(PendingRequest::class, $response[0]);
+        static::assertSame('foo', $response[1]);
+        static::assertSame('bar', $response[2]);
+        static::assertSame('baz', $response[3]);
+
+        $response = TestActionApiServer::api()->requestMiddle('foo', 'bar', 'baz');
+        static::assertSame('foo', $response[0]);
+        static::assertSame('bar', $response[1]);
+        static::assertInstanceOf(PendingRequest::class, $response[2]);
+        static::assertSame('baz', $response[3]);
+
+        $response = TestActionApiServer::api()->requestLast('foo', 'bar', 'baz');
+        static::assertSame('foo', $response[0]);
+        static::assertSame('bar', $response[1]);
+        static::assertSame('baz', $response[2]);
+        static::assertInstanceOf(PendingRequest::class, $response[3]);
+
+        $response = TestActionApiServer::api()->requestOptional('foo', 'bar');
+        static::assertSame('foo', $response[0]);
+        static::assertInstanceOf(PendingRequest::class, $response[1]);
+        static::assertSame('bar', $response[2]);
+
+        Http::assertNothingSent();
+    }
+
+    #[Test]
+    public function forwards_calls_to_the_request(): void
     {
         Http::fake();
 
@@ -181,7 +227,8 @@ class ApiRequestProxyTest extends TestCase
         });
     }
 
-    public function test_forwards_properties_to_api_server_action(): void
+    #[Test]
+    public function forwards_properties_to_api_server_action(): void
     {
         Http::fake();
 
@@ -190,7 +237,8 @@ class ApiRequestProxyTest extends TestCase
         static::assertSame('as property', $result);
     }
 
-    public function test_throws_when_property_does_not_exist_in_api(): void
+    #[Test]
+    public function throws_when_property_does_not_exist_in_api(): void
     {
         $this->expectException(ErrorException::class);
         $this->expectExceptionMessage('Undefined property: Tests\TestActionApiServer::$badProperty');
@@ -198,7 +246,8 @@ class ApiRequestProxyTest extends TestCase
         TestActionApiServer::api()->badProperty;
     }
 
-    public function test_forwards_properties_to_api_server_inline_action(): void
+    #[Test]
+    public function forwards_properties_to_api_server_inline_action(): void
     {
         Http::fake();
 
@@ -211,44 +260,86 @@ class ApiRequestProxyTest extends TestCase
         });
     }
 
-    public function test_uses_auth_basic(): void
+    #[Test]
+    public function uses_auth_basic(): void
     {
         Http::fake();
 
-        TestAuthApiServer::api()->useAuth('basic')->get('test');
+        TestAuthApiServer::api()->useAuth('basic', ['user', 'pass'])->get('test');
 
         Http::assertSent(static function (Request $request): bool {
-            static::assertSame(['Basic Zm9vOmJhcg=='], $request->header('Authorization'));
+            static::assertSame(['Basic dXNlcjpwYXNz'], $request->header('Authorization'));
+
+            return true;
+        });
+
+        TestAuthApiServer::api()->useAuth('basic', ['username' => 'user', 'password' => 'pass'])->get('test');
+
+        Http::assertSent(static function (Request $request): bool {
+            static::assertSame(['Basic dXNlcjpwYXNz'], $request->header('Authorization'));
 
             return true;
         });
     }
 
-    public function test_uses_auth_digest(): void
+    #[Test]
+    public function uses_auth_digest(): void
     {
         Http::fake();
 
-        TestAuthApiServer::api()->useAuth('digest')->beforeSending(static function (Request $request, array $options): void {
-            static::assertSame(['baz', 'quz', 'digest'], $options['auth']);
-        })->get('test');
+        TestAuthApiServer::api()
+            ->useAuth('digest', ['user', 'pass'])
+            ->beforeSending(static function (Request $request, array $options): void {
+                static::assertSame(['user', 'pass', 'digest'], $options['auth']);
+            })
+            ->get('test');
 
-        Http::assertSentCount(1);
+        Http::fake();
+
+        TestAuthApiServer::api()
+            ->useAuth('digest', ['username' => 'user', 'password' => 'pass'])
+            ->beforeSending(static function (Request $request, array $options): void {
+                static::assertSame(['user', 'pass', 'digest'], $options['auth']);
+            })
+            ->get('test');
     }
 
-    public function test_uses_auth_token(): void
+    #[Test]
+    public function uses_auth_token(): void
     {
         Http::fake();
 
-        TestAuthApiServer::api()->useAuth('token')->get('test');
+        TestAuthApiServer::api()->useAuth('token', ['test_token'])->get('test');
 
         Http::assertSent(static function (Request $request): bool {
-            static::assertSame(['Bearer qux'], $request->header('Authorization'));
+            static::assertSame(['Bearer test_token'], $request->header('Authorization'));
+
+            return true;
+        });
+
+        Http::fake();
+
+        TestAuthApiServer::api()->useAuth('token', ['test_token', 'Custom'])->get('test');
+
+        Http::assertSent(static function (Request $request): bool {
+            static::assertSame(['Custom test_token'], $request->header('Authorization'));
+
+            return true;
+        });
+
+        Http::fake();
+
+        TestAuthApiServer::api()->useAuth('token', ['token' => 'test_token', 'type' => 'Custom'])->get('test');
+
+        Http::assertSent(static function (Request $request): bool {
+            static::assertSame(['Custom test_token'], $request->header('Authorization'));
 
             return true;
         });
     }
 
-    public function test_support_pools(): void
+    #[Test]
+    public function support_pools(): void
     {
         Http::fake([
             'https://www.test.com/200' => Http::response('', 200),
@@ -267,7 +358,8 @@ class ApiRequestProxyTest extends TestCase
         static::assertSame(500, $responses[2]->status());
     }
 
-    public function test_support_pools_with_named_requests(): void
+    #[Test]
+    public function support_pools_with_named_requests(): void
     {
         Http::fake([
             'https://www.test.com/200' => Http::response('', 200),
@@ -285,6 +377,54 @@ class ApiRequestProxyTest extends TestCase
         static::assertSame(400, $responses['bar']->status());
         static::assertSame(500, $responses['quz']->status());
     }
+
+    #[Test]
+    public function wraps_into_custom_response_if_set_as_action(): void
+    {
+        Http::fake([
+            'https://www.test.com/200' => Http::response('', 200),
+        ]);
+
+        $result = TestAuthWrapRequestServerAction::api()->example();
+
+        static::assertInstanceOf(Fixtures\CustomResponse::class, $result);
+    }
+
+    #[Test]
+    public function wraps_into_custom_response_if_set_as_method(): void
+    {
+        Http::fake([
+            'https://www.test.com/200' => Http::response('', 200),
+        ]);
+
+        $result = TestAuthWrapRequestServerMethod::api()->example();
+
+        static::assertInstanceOf(Fixtures\CustomResponse::class, $result);
+    }
+
+    #[Test]
+    public function wraps_int_custom_response_if_set_async_action(): void
+    {
+        Http::fake([
+            'https://www.test.com/200' => Http::response('', 200),
+        ]);
+
+        $result = TestAuthWrapRequestServerAction::api()->async()->example()->wait();
+
+        static::assertInstanceOf(Fixtures\CustomResponse::class, $result);
+    }
+
+    #[Test]
+    public function wraps_int_custom_response_if_set_async_method(): void
+    {
+        Http::fake([
+            'https://www.test.com/200' => Http::response('', 200),
+        ]);
+
+        $result = TestAuthWrapRequestServerMethod::api()->async()->example()->wait();
+
+        static::assertInstanceOf(Fixtures\CustomResponse::class, $result);
+    }
 }
 
 class TestPropertiesApiServer extends ApiServer
@@ -294,9 +434,9 @@ class TestPropertiesApiServer extends ApiServer
         return  'https://www.properties.com';
     }
 
-    public array $headers = ['X-Foo' => 'bar'];
+    public $headers = ['X-Foo' => 'bar'];
 
-    public ?int $timeout = 10;
+    public $timeout = 10;
 }
 
 class TestActionApiServer extends ApiServer
@@ -315,7 +455,7 @@ class TestActionApiServer extends ApiServer
         return $this->url ?? 'https://www.test.com';
     }
 
-    public array $actions = [
+    public $actions = [
         'foo' => 'foo/action',
         'bar' => 'get:bar/action',
         'baz quz' => 'post:baz/quz',
@@ -329,6 +469,26 @@ class TestActionApiServer extends ApiServer
     public function override(PendingRequest $request, string $message)
     {
         return $message;
+    }
+
+    public function requestFirst(PendingRequest $first, string $second, string $third, string $fourth)
+    {
+        return func_get_args();
+    }
+
+    public function requestMiddle(string $first, string $second, PendingRequest $third, string $fourth)
+    {
+        return func_get_args();
+    }
+
+    public function requestLast(string $first, string $second, string $third, PendingRequest $fourth)
+    {
+        return func_get_args();
+    }
+
+    public function requestOptional(string $first, PendingRequest $second, string $third = null, string $fourth = null)
+    {
+        return func_get_args();
     }
 
     public function asProperty()
@@ -360,27 +520,60 @@ class TestBuildApiServer extends TestActionApiServer
 
 class TestAuthApiServer extends TestActionApiServer
 {
-    public string $auth = '';
+    public array $auth = ['', []];
 
-    public function useAuth(string $auth): static
+    public function useAuth(string $auth, array $data): static
     {
-        $this->auth = $auth;
+        $this->auth = [$auth, $data];
 
         return $this;
     }
 
     public function authBasic()
     {
-        return $this->auth === 'basic' ? ['foo', 'bar'] : parent::authBasic();
+        return $this->auth[0] === 'basic' ? $this->auth[1] : parent::authBasic();
     }
 
     public function authDigest()
     {
-        return $this->auth === 'digest' ? ['baz', 'quz'] : parent::authDigest();
+        return $this->auth[0] === 'digest' ? $this->auth[1] : parent::authDigest();
     }
 
     public function authToken()
     {
-        return $this->auth === 'token' ? 'qux' : parent::authToken();
+        return $this->auth[0] === 'token' ? $this->auth[1] : parent::authToken();
+    }
+}
+
+class TestAuthWrapRequestServerMethod extends ApiServer
+{
+    public $responses = [
+        'example' => Fixtures\CustomResponse::class,
+    ];
+
+    public function getBaseUrl()
+    {
+        return 'https://www.test.com';
+    }
+
+    public function example(PendingRequest $request)
+    {
+        return $request->get('/200');
+    }
+}
+
+class TestAuthWrapRequestServerAction extends ApiServer
+{
+    public $actions = [
+        'example' => '200'
+    ];
+
+    public $responses = [
+        'example' => Fixtures\CustomResponse::class,
+    ];
+
+    public function getBaseUrl()
+    {
+        return 'https://www.test.com';
     }
 }

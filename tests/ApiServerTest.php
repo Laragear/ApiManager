@@ -3,10 +3,12 @@
 namespace Tests;
 
 use Laragear\ApiManager\ApiServer;
+use PHPUnit\Framework\Attributes\Test;
 
 class ApiServerTest extends TestCase
 {
-    public function test_builds_itself(): void
+    #[Test]
+    public function builds_itself(): void
     {
         static::assertInstanceOf(TestSelfRegistrableApiServer::class, TestSelfRegistrableApiServer::api()->api);
     }

@@ -8,13 +8,12 @@ class ApiManagerServiceProvider extends ServiceProvider
 {
     /**
      * Register the application services.
-     *
-     * @return void
      */
     public function register(): void
     {
-        if ($this->app->runningInConsole()) {
-            $this->commands(Console\Commands\Api::class);
-        }
+        $this->commands([
+            Console\Commands\MakeApi::class,
+            Console\Commands\MakeApiResponse::class,
+        ]);
     }
 }

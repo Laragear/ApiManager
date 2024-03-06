@@ -13,8 +13,8 @@ use function trim;
 /**
  * @internal
  */
-#[AsCommand(name: 'make:api')]
-class Api extends GeneratorCommand
+#[AsCommand('make:api', 'Creates a new API class to simplify server-side requests')]
+class MakeApi extends GeneratorCommand
 {
     /**
      * The console command name.
@@ -35,18 +35,17 @@ class Api extends GeneratorCommand
      *
      * @var string
      */
-    protected $type = 'Api';
+    protected $type = 'API Server';
 
     /**
      * Build the class with the given name.
      *
      * @param  string  $name
      * @return string
-     * @throws \Illuminate\Contracts\Filesystem\FileNotFoundException
      */
     protected function buildClass($name)
     {
-        return str_replace('dummyClass', Str::snake(class_basename($name), '-'), parent::buildClass($name));
+        return str_replace('dummy-class', Str::snake(class_basename($name), '-'), parent::buildClass($name));
     }
 
     /**
@@ -56,26 +55,23 @@ class Api extends GeneratorCommand
      */
     protected function rootNamespace()
     {
-        return $this->laravel->getNamespace() . 'Http\Apis';
+        return $this->laravel->getNamespace() . 'Http\Apis\\';
     }
 
     /**
      * Get the destination class path.
      *
-     * @param  string  $name
      * @return string
      */
     protected function getPath($name)
     {
-        $name = Str::replaceFirst($this->rootNamespace(), '', $name);
+        $name = Str::replaceFirst($this->laravel->getNamespace(), '', $name);
 
-        return $this->laravel['path'].'/Http/Apis/'.str_replace('\\', '/', $name).'.php';
+        return $this->laravel['path'].'/'. str_replace('\\', '/', $name).'.php';
     }
 
     /**
      * Get the stub file for the generator.
-     *
-     * @return string
      */
     protected function getStub(): string
     {
@@ -84,14 +80,25 @@ class Api extends GeneratorCommand
 
     /**
      * Resolve the fully-qualified path to the stub.
-     *
-     * @param  string  $stub
-     * @return string
      */
     protected function resolveStubPath(string $stub): string
     {
         return file_exists($customPath = $this->laravel->basePath(trim($stub, '/')))
             ? $customPath
             : __DIR__.'/../../../'.$stub;
+    }
+
+    /**
+     * Prompt for missing input arguments using the returned questions.
+     *
+     * @return array
+     */
+    protected function promptForMissingArgumentsUsing()
+    {
+        return [
+            'name' => [
+                'What should the '.strtolower($this->type).' be named?', 'E.g. Chirp',
+            ],
+        ];
     }
 }

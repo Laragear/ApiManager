@@ -1,0 +1,10 @@
+<?php
+
+namespace {{ namespace }};
+
+use Illuminate\Http\Client\Response;
+
+class DummyClass extends Response
+{
+    //
+}

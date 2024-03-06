@@ -11,8 +11,8 @@ class DummyClass extends ApiServer
      *
      * @var array|array{string:string}
      */
-    public array $headers = [
-        // ...
+    public $headers = [
+        // 'X-Requested-With' => 'Laragear Api Manager'
     ];
 
     /**
@@ -20,7 +20,7 @@ class DummyClass extends ApiServer
      *
      * @var array|string[]
      */
-    public array $actions = [
+    public $actions = [
         'latest' => '/',
         'create' => 'post:new',
     ];
@@ -30,20 +30,20 @@ class DummyClass extends ApiServer
      *
      * @return string
      */
-    abstract public function getBaseUrl(): string
+    public function getBaseUrl()
     {
         return app()->isProduction()
-            ? 'https://dummyClass.com/api/v1'
-            : 'https://dev.dummyClass.com/api/v1';
+            ? 'https://dummy-class.com/api/v1'
+            : 'https://dev.dummy-class.com/api/v1';
     }
 
     /**
      * Returns the Bearer Token used for authentication.
      *
-     * @return string
+     * @return string|array
      */
-    protected function authToken(): string
+    public function authToken()
     {
-        return config('services.dummyClass.secret');
+        return config('services.dummy-class.secret');
     }
 }
