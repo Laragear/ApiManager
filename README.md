@@ -4,7 +4,7 @@
 [![Codecov coverage](https://codecov.io/gh/Laragear/ApiManager/branch/1.x/graph/badge.svg?token=V726ud0ss6)](https://codecov.io/gh/Laragear/ApiManager)
 [![Maintainability](https://api.codeclimate.com/v1/badges/62cbbc29179121baad6a/maintainability)](https://codeclimate.com/github/Laragear/ApiManager/maintainability)
 [![Sonarcloud Status](https://sonarcloud.io/api/project_badges/measure?project=Laragear_ApiManager&metric=alert_status)](https://sonarcloud.io/dashboard?id=Laragear_ApiManager)
-[![Laravel Octane Compatibility](https://img.shields.io/badge/Laravel%20Octane-Compatible-success?style=flat&logo=laravel)](https://laravel.com/docs/10.x/octane#introduction)
+[![Laravel Octane Compatibility](https://img.shields.io/badge/Laravel%20Octane-Compatible-success?style=flat&logo=laravel)](https://laravel.com/docs/11.x/octane#introduction)
 
 Manage multiple REST servers to make requests in few lines and fluently. No more verbose HTTP Requests!
 
@@ -22,8 +22,7 @@ Your support allows me to keep this package free, up-to-date and maintainable. A
 
 ## Requirements
 
-* PHP 8.0 or later
-* Laravel 9, 10 or later
+* Laravel 10 or later
 
 ## Installation
 
@@ -95,7 +94,7 @@ class Chirper extends ApiServer
 }
 ```
 
-> **Note**
+> [!NOTE]
 >
 > You can override the API Server stub creating one in `stubs/api.stub`.
 
@@ -189,7 +188,7 @@ use App\Http\Apis\Chirper;
 $chirp = Chirper::api()->newChirp('Easy peasy');
 ```
 
-> **Note**
+> [!NOTE]
 >
 > Method actions take precedence over inline actions.
 
@@ -232,7 +231,7 @@ public function build(PendingRequest $request)
 }
 ```
 
-> **Note**
+> [!NOTE]
 >
 > The `build()` method is executed after the base URL, headers, and authentication, is built.
 
@@ -246,7 +245,7 @@ use App\Http\Apis\Chirper;
 $chirp = Chirper::api()->timeout(5)->latest();
 ```
 
-> **Note**
+> [!NOTE]
 >
 > If the method exists in your API Class, it will take precedence.
 
@@ -358,4 +357,4 @@ If you discover any security related issues, please email darkghosthunter@gmail.
 
 This specific package version is licensed under the terms of the [MIT License](LICENSE.md), at time of publishing.
 
-[Laravel](https://laravel.com) is a Trademark of [Taylor Otwell](https://github.com/TaylorOtwell/). Copyright © 2011-2023 Laravel LLC.
+[Laravel](https://laravel.com) is a Trademark of [Taylor Otwell](https://github.com/TaylorOtwell/). Copyright © 2011-2024 Laravel LLC.

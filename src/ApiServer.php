@@ -16,8 +16,6 @@ abstract class ApiServer
 
     /**
      * The number of seconds to wait for a response.
-     *
-     * @var int|null
      */
     public ?int $timeout = null;
 
@@ -30,8 +28,6 @@ abstract class ApiServer
 
     /**
      * Returns the API base URL.
-     *
-     * @return string
      */
     abstract public function getBaseUrl(): string;
 
@@ -83,7 +79,6 @@ abstract class ApiServer
     /**
      * Returns the API Server implementation.
      *
-     * @param  array  $parameters
      * @return \Laragear\ApiManager\ApiRequestProxy<static>
      */
     public static function api(array $parameters = []): ApiRequestProxy

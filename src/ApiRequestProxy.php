@@ -35,16 +35,11 @@ class ApiRequestProxy
 
     /**
      * The built Pending Request.
-     *
-     * @var \Illuminate\Http\Client\PendingRequest
      */
     public PendingRequest $request;
 
     /**
      * Create a new Api Request instance.
-     *
-     * @param  \Laragear\ApiManager\ApiServer  $api
-     * @param  \Illuminate\Http\Client\Factory  $requestFactory
      */
     public function __construct(protected Factory $requestFactory, public ApiServer $api)
     {
@@ -57,8 +52,6 @@ class ApiRequestProxy
 
     /**
      * Builds the API request once.
-     *
-     * @return \Illuminate\Http\Client\PendingRequest
      */
     protected function buildApiRequest(): PendingRequest
     {
@@ -91,10 +84,7 @@ class ApiRequestProxy
     /**
      * Sets the request to use a given pool.
      *
-     * @param  \Illuminate\Http\Client\Pool  $pool
-     * @param  string|null  $as
      * @return $this
-     * @throws \ReflectionException
      */
     public function on(Pool $pool, string $as = null): static
     {
@@ -115,8 +105,6 @@ class ApiRequestProxy
     /**
      * Finds an action string based on its name.
      *
-     * @param  string  $name
-     * @return string|null
      * @internal
      */
     protected function findApiAction(string $name): ?string
@@ -133,10 +121,6 @@ class ApiRequestProxy
 
     /**
      * Executes a pre-defined short action.
-     *
-     * @param  string  $action
-     * @param  array  $parameters
-     * @return \Illuminate\Http\Client\PendingRequest|\Illuminate\Http\Client\Response|\GuzzleHttp\Promise\PromiseInterface
      */
     protected function executeApiAction(string $action, array $parameters): PendingRequest|Response|PromiseInterface {
         [$verb, $path] = str_contains($action, ':') ? explode(':', $action) : ['get', $action];
@@ -146,11 +130,6 @@ class ApiRequestProxy
 
     /**
      * Executes the API class method, optionally passing the request if needed.
-     *
-     * @param  string  $method
-     * @param  array  $parameters
-     * @return mixed
-     * @throws \ReflectionException
      */
     protected function executeApiMethod(string $method, array $parameters): mixed
     {
@@ -167,9 +146,7 @@ class ApiRequestProxy
     /**
      * Proxy accessing an attribute onto the API instance.
      *
-     * @param  string  $name
      * @return $this|\GuzzleHttp\Promise\PromiseInterface|\Illuminate\Http\Client\PendingRequest|\Illuminate\Http\Client\Response
-     * @throws \ErrorException|\ReflectionException
      */
     public function __get(string $name)
     {
@@ -189,10 +166,7 @@ class ApiRequestProxy
     /**
      * Handle dynamic calls to the object.
      *
-     * @param  string  $method
-     * @param  array  $parameters
      * @return static|\GuzzleHttp\Promise\PromiseInterface|\Illuminate\Http\Client\PendingRequest|\Illuminate\Http\Client\Response
-     * @throws \ReflectionException
      */
     public function __call(string $method, array $parameters)
     {

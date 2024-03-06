@@ -42,7 +42,6 @@ class Api extends GeneratorCommand
      *
      * @param  string  $name
      * @return string
-     * @throws \Illuminate\Contracts\Filesystem\FileNotFoundException
      */
     protected function buildClass($name)
     {
@@ -62,7 +61,6 @@ class Api extends GeneratorCommand
     /**
      * Get the destination class path.
      *
-     * @param  string  $name
      * @return string
      */
     protected function getPath($name)
@@ -74,8 +72,6 @@ class Api extends GeneratorCommand
 
     /**
      * Get the stub file for the generator.
-     *
-     * @return string
      */
     protected function getStub(): string
     {
@@ -84,9 +80,6 @@ class Api extends GeneratorCommand
 
     /**
      * Resolve the fully-qualified path to the stub.
-     *
-     * @param  string  $stub
-     * @return string
      */
     protected function resolveStubPath(string $stub): string
     {
