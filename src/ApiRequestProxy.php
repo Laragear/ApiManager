@@ -14,6 +14,7 @@ use Illuminate\Support\Traits\ForwardsCalls;
 use LogicException;
 use ReflectionMethod;
 use ReflectionProperty;
+
 use function array_merge;
 use function array_unshift;
 use function class_basename;
@@ -89,7 +90,7 @@ class ApiRequestProxy
     public function on(Pool $pool, string $as = null): static
     {
         // We will have to retrieve by force the pool values.
-        $handler = tap((new ReflectionProperty($pool, 'handler')))->setAccessible(true)->getValue($pool);
+        $handler = tap(new ReflectionProperty($pool, 'handler'))->setAccessible(true)->getValue($pool);
         $requests = (new ReflectionProperty($pool, 'pool'));
 
         $request = $this->buildApiRequest()->setHandler($handler)->async();
@@ -115,6 +116,7 @@ class ApiRequestProxy
                     return $action;
                 }
             }
+
             return null;
         })($name);
     }
@@ -122,7 +124,8 @@ class ApiRequestProxy
     /**
      * Executes a pre-defined short action.
      */
-    protected function executeApiAction(string $action, array $parameters): PendingRequest|Response|PromiseInterface {
+    protected function executeApiAction(string $action, array $parameters): PendingRequest|Response|PromiseInterface
+    {
         [$verb, $path] = str_contains($action, ':') ? explode(':', $action) : ['get', $action];
 
         return $this->buildApiRequest()->{$verb}($path, ...$parameters);

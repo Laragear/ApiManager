@@ -79,6 +79,7 @@ class ApiRequestProxyTest extends TestCase
         Http::assertSent(static function (Request $request): bool {
             static::assertSame('GET', $request->method());
             static::assertSame('https://www.test.com/foo/action', $request->url());
+
             return true;
         });
     }
@@ -92,6 +93,7 @@ class ApiRequestProxyTest extends TestCase
         Http::assertSent(static function (Request $request): bool {
             static::assertSame('GET', $request->method());
             static::assertSame('https://www.test.com/bar/action', $request->url());
+
             return true;
         });
     }
@@ -104,6 +106,7 @@ class ApiRequestProxyTest extends TestCase
 
         Http::assertSent(static function (Request $request): bool {
             static::assertSame('https://www.test.com/baz/quz', $request->url());
+
             return true;
         });
     }
@@ -117,6 +120,7 @@ class ApiRequestProxyTest extends TestCase
         Http::assertSent(static function (Request $request): bool {
             static::assertSame('POST', $request->method());
             static::assertSame('https://www.test.com/baz/quz', $request->url());
+
             return true;
         });
     }
@@ -130,6 +134,7 @@ class ApiRequestProxyTest extends TestCase
         Http::assertSent(static function (Request $request): bool {
             static::assertSame('POST', $request->method());
             static::assertSame('https://www.test.com/baz/quz/10', $request->url());
+
             return true;
         });
     }
@@ -145,6 +150,7 @@ class ApiRequestProxyTest extends TestCase
         Http::assertSent(static function (Request $request): bool {
             static::assertSame('GET', $request->method());
             static::assertSame('www.google.com/test', $request->url());
+
             return true;
         });
     }
@@ -177,6 +183,7 @@ class ApiRequestProxyTest extends TestCase
         Http::assertSent(static function (Request $request): bool {
             static::assertSame('GET', $request->method());
             static::assertSame('www.google.com/test', $request->url());
+
             return true;
         });
     }
@@ -207,6 +214,7 @@ class ApiRequestProxyTest extends TestCase
         Http::assertSent(static function (Request $request): bool {
             static::assertSame('GET', $request->method());
             static::assertSame('https://www.test.com/foo/action', $request->url());
+
             return true;
         });
     }
@@ -316,14 +324,14 @@ class TestActionApiServer extends ApiServer
     }
 
     public array $actions = [
-        'foo' => 'foo/action',
-        'bar' => 'get:bar/action',
-        'baz quz' => 'post:baz/quz',
-        'parameter' => 'post:baz/quz/{id}',
-        'invalid' => 'invalid:/something',
-        'hacky' => 'baseUrl:www.google.com',
-        'override' => 'get:/not-overridden',
-        'as property' => 'get:/not-overridden-property'
+        'foo'         => 'foo/action',
+        'bar'         => 'get:bar/action',
+        'baz quz'     => 'post:baz/quz',
+        'parameter'   => 'post:baz/quz/{id}',
+        'invalid'     => 'invalid:/something',
+        'hacky'       => 'baseUrl:www.google.com',
+        'override'    => 'get:/not-overridden',
+        'as property' => 'get:/not-overridden-property',
     ];
 
     public function override(PendingRequest $request, string $message)

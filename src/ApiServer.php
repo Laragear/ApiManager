@@ -3,6 +3,7 @@
 namespace Laragear\ApiManager;
 
 use Illuminate\Http\Client\PendingRequest;
+
 use function app;
 
 abstract class ApiServer
@@ -34,7 +35,8 @@ abstract class ApiServer
     /**
      * Build the pending request for this API.
      *
-     * @param  \Illuminate\Http\Client\PendingRequest  $request
+     * @param \Illuminate\Http\Client\PendingRequest $request
+     *
      * @return \Illuminate\Http\Client\PendingRequest|void
      */
     public function build(PendingRequest $request)

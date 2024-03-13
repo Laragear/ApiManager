@@ -5,6 +5,7 @@ namespace Laragear\ApiManager\Console\Commands;
 use Illuminate\Console\GeneratorCommand;
 use Illuminate\Support\Str;
 use Symfony\Component\Console\Attribute\AsCommand;
+
 use function class_basename;
 use function file_exists;
 use function str_replace;
@@ -40,7 +41,8 @@ class Api extends GeneratorCommand
     /**
      * Build the class with the given name.
      *
-     * @param  string  $name
+     * @param string $name
+     *
      * @return string
      */
     protected function buildClass($name)
@@ -55,7 +57,7 @@ class Api extends GeneratorCommand
      */
     protected function rootNamespace()
     {
-        return $this->laravel->getNamespace() . 'Http\Apis';
+        return $this->laravel->getNamespace().'Http\Apis';
     }
 
     /**
