@@ -11,10 +11,10 @@ use Illuminate\Http\Client\Response;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
 use Illuminate\Support\Traits\ForwardsCalls;
-use Laragear\ApiManager\Attributes\UseResponse;
 use LogicException;
 use ReflectionMethod;
 use ReflectionProperty;
+
 use function array_merge;
 use function array_splice;
 use function class_basename;
@@ -72,19 +72,19 @@ class ApiRequestProxy
             ->when(
                 $this->api->authBasic(),
                 static function (PendingRequest $request, array $auth): PendingRequest {
-                    return $request->withBasicAuth(... $auth);
+                    return $request->withBasicAuth(...$auth);
                 }
             )
             ->when(
                 $this->api->authDigest(),
                 static function (PendingRequest $request, array $auth): PendingRequest {
-                    return $request->withDigestAuth(... $auth);
+                    return $request->withDigestAuth(...$auth);
                 }
             )
             ->when(
                 $this->api->authToken(),
                 static function (PendingRequest $request, array|string $auth): PendingRequest {
-                    return $request->withToken(... (array) $auth);
+                    return $request->withToken(...(array) $auth);
                 }
             );
 
@@ -99,7 +99,7 @@ class ApiRequestProxy
     public function on(Pool $pool, string $as = null): static
     {
         // We will have to retrieve by force the pool values.
-        $handler = tap((new ReflectionProperty($pool, 'handler')))->setAccessible(true)->getValue($pool);
+        $handler = tap(new ReflectionProperty($pool, 'handler'))->setAccessible(true)->getValue($pool);
         $requests = (new ReflectionProperty($pool, 'pool'));
 
         $request = $this->getApiRequest()->setHandler($handler)->async();
@@ -163,8 +163,9 @@ class ApiRequestProxy
     /**
      * Wrap the response or promise into a custom response if found.
      *
-     * @param  mixed  $response
-     * @param  string  $name
+     * @param mixed  $response
+     * @param string $name
+     *
      * @return mixed
      */
     protected function wrapResponse(mixed $response, string $name): mixed

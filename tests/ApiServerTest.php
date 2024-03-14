@@ -12,7 +12,6 @@ class ApiServerTest extends TestCase
     {
         static::assertInstanceOf(TestSelfRegistrableApiServer::class, TestSelfRegistrableApiServer::api()->api);
     }
-
 }
 
 class TestSelfRegistrableApiServer extends ApiServer

@@ -6,6 +6,7 @@ use Illuminate\Console\GeneratorCommand;
 use Illuminate\Support\Str;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Input\InputArgument;
+
 use function file_exists;
 
 /**
@@ -38,9 +39,9 @@ class MakeApiResponse extends GeneratorCommand
     /**
      * Execute the console command.
      *
-     * @return bool|null
-     *
      * @throws \Illuminate\Contracts\Filesystem\FileNotFoundException
+     *
+     * @return bool|null
      */
     public function handle()
     {
@@ -59,7 +60,7 @@ class MakeApiResponse extends GeneratorCommand
     {
         $api = Str::ucfirst($this->argument('api'));
 
-        return ! file_exists($this->getPath($this->laravel->getNamespace() . "Http\Apis\\$api"));
+        return !file_exists($this->getPath($this->laravel->getNamespace()."Http\Apis\\$api"));
     }
 
     /**
@@ -89,7 +90,7 @@ class MakeApiResponse extends GeneratorCommand
     {
         $api = Str::studly($this->argument('api'));
 
-        return $this->laravel->getNamespace() . "Http\Apis\\$api\\Responses\\";
+        return $this->laravel->getNamespace()."Http\Apis\\$api\\Responses\\";
     }
 
     /**
@@ -131,7 +132,7 @@ class MakeApiResponse extends GeneratorCommand
     {
         return [
             ['api', InputArgument::REQUIRED, 'The name of the API for the namespace of the custom response'],
-            ['name', InputArgument::REQUIRED, 'The name of the '.strtolower($this->type)]
+            ['name', InputArgument::REQUIRED, 'The name of the '.strtolower($this->type)],
         ];
     }
 
