@@ -139,6 +139,7 @@ class ApiRequestProxy
     {
         // If any parameter requires the Pending Request, add it and stop checking the rest.
         foreach ((new ReflectionMethod($this->api, $method))->getParameters() as $key => $parameter) {
+            // @phpstan-ignore-next-line
             if ($parameter->getType()?->getName() === PendingRequest::class) {
                 array_splice($parameters, $key, 0, [$this->getApiRequest()]);
 
