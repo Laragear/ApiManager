@@ -5,6 +5,7 @@ namespace Laragear\ApiManager;
 use Illuminate\Http\Client\PendingRequest;
 use Illuminate\Support\Traits\Conditionable;
 use Illuminate\Support\Traits\Tappable;
+
 use function app;
 
 abstract class ApiServer
@@ -50,7 +51,8 @@ abstract class ApiServer
     /**
      * Modify a pristine new Pending Request.
      *
-     * @param  \Illuminate\Http\Client\PendingRequest  $request
+     * @param \Illuminate\Http\Client\PendingRequest $request
+     *
      * @return \Illuminate\Http\Client\PendingRequest|null|void
      */
     public function beforeBuild(PendingRequest $request)
@@ -61,7 +63,8 @@ abstract class ApiServer
     /**
      * Modify Pending Request after its bootstrapped.
      *
-     * @param  \Illuminate\Http\Client\PendingRequest  $request
+     * @param \Illuminate\Http\Client\PendingRequest $request
+     *
      * @return \Illuminate\Http\Client\PendingRequest|null|void
      */
     public function afterBuild(PendingRequest $request)
@@ -74,7 +77,8 @@ abstract class ApiServer
      *
      * @deprecated Use `afterBuild()` instead.
      *
-     * @param  \Illuminate\Http\Client\PendingRequest  $request
+     * @param \Illuminate\Http\Client\PendingRequest $request
+     *
      * @return \Illuminate\Http\Client\PendingRequest|null|void
      */
     public function build(PendingRequest $request)

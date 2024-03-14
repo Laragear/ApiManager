@@ -6,5 +6,4 @@ use Illuminate\Http\Client\Response;
 
 class CustomResponse extends Response
 {
-
 }
