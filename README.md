@@ -121,7 +121,7 @@ protected $actions = [
 
 For example, to update a chirp, we could call `edit` directly from our `ChirpApi`.
 
-While you're at it, add the PHPDoc manually to your API Server to take advantage of autocompletion (intellisense). Just remember that you can access responses as property if these don't require data/parameters, and to take out the first parameter as the path.
+While you're at it, add the PHPDoc manually to your API Server to take advantage of autocompletion (intellisense).
 
 ```php
 use Laragear\ApiManager\ApiServer;

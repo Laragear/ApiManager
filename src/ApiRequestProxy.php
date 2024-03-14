@@ -184,6 +184,16 @@ class ApiRequestProxy
     }
 
     /**
+     * Retrieves the class Response for this action.
+     *
+     * @return class-string<\Illuminate\Http\Client\Response>|null
+     */
+    protected function findClassResponse(string $action): ?string
+    {
+        return Arr::get($this->api->responses, Str::camel($action));
+    }
+
+    /**
      * Proxy accessing an attribute onto the API instance.
      */
     public function __get(string $name): mixed
@@ -199,16 +209,6 @@ class ApiRequestProxy
         }
 
         throw new ErrorException(sprintf('Undefined property: %s::$%s', $this->api::class, $name));
-    }
-
-    /**
-     * Retrieves the class Response for this action.
-     *
-     * @return class-string<\Illuminate\Http\Client\Response>|null
-     */
-    protected function findClassResponse(string $action): ?string
-    {
-        return Arr::get($this->api->responses, Str::camel($action));
     }
 
     /**
