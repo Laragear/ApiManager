@@ -96,9 +96,10 @@ class ApiRequestProxy
      *
      * @return $this
      */
-    public function on(Pool $pool, string $as = null): static
+    public function on(Pool $pool, ?string $as = null): static
     {
         // We will have to retrieve by force the pool values.
+        // @phpstan-ignore-next-line
         $handler = tap(new ReflectionProperty($pool, 'handler'))->setAccessible(true)->getValue($pool);
         $requests = (new ReflectionProperty($pool, 'pool'));
 
@@ -107,6 +108,7 @@ class ApiRequestProxy
         // If it's using a name, set it here.
         $value = $as ? [$as => $request] : [$request];
 
+        // @phpstan-ignore-next-line
         $requests->setValue($pool, array_merge(tap($requests)->setAccessible(true)->getValue($pool), $value));
 
         return $this;
