@@ -4,6 +4,9 @@ namespace Laragear\ApiManager;
 
 use Illuminate\Support\ServiceProvider;
 
+/**
+ * @internal
+ */
 class ApiManagerServiceProvider extends ServiceProvider
 {
     /**

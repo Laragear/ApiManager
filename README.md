@@ -1,8 +1,8 @@
 # Api Manager
 [![Latest Version on Packagist](https://img.shields.io/packagist/v/laragear/api-manager.svg)](https://packagist.org/packages/laragear/api-manager)
 [![Latest stable test run](https://github.com/Laragear/ApiManager/workflows/Tests/badge.svg)](https://github.com/Laragear/ApiManager/actions)
-[![Codecov coverage](https://codecov.io/gh/Laragear/ApiManager/branch/1.x/graph/badge.svg?token=V726ud0ss6)](https://codecov.io/gh/Laragear/ApiManager)
-[![Maintainability](https://api.codeclimate.com/v1/badges/62cbbc29179121baad6a/maintainability)](https://codeclimate.com/github/Laragear/ApiManager/maintainability)
+[![Codecov Coverage](https://codecov.io/gh/Laragear/ApiManager/graph/badge.svg?token=V726ud0ss6)](https://codecov.io/gh/Laragear/ApiManager)
+[![Maintainability](https://qlty.sh/badges/f2df384c-4439-4715-948f-97d94966cfb7/maintainability.svg)](https://qlty.sh/gh/Laragear/projects/ApiManager)
 [![Sonarcloud Status](https://sonarcloud.io/api/project_badges/measure?project=Laragear_ApiManager&metric=alert_status)](https://sonarcloud.io/dashboard?id=Laragear_ApiManager)
 [![Laravel Octane Compatibility](https://img.shields.io/badge/Laravel%20Octane-Compatible-success?style=flat&logo=laravel)](https://laravel.com/docs/11.x/octane#introduction)
 
@@ -22,7 +22,7 @@ Your support allows me to keep this package free, up-to-date and maintainable. A
 
 ## Requirements
 
-* Laravel 10 or later
+* Laravel 11 or later
 
 ## Installation
 
@@ -439,10 +439,10 @@ There should be no problems using this package with Laravel Octane.
 
 ## Security
 
-If you discover any security related issues, please email darkghosthunter@gmail.com instead of using the issue tracker.
+If you discover any security related issues, please [use the online form](https://github.com/Laragear/ApiManager/security).
 
 # License
 
 This specific package version is licensed under the terms of the [MIT License](LICENSE.md), at time of publishing.
 
-[Laravel](https://laravel.com) is a Trademark of [Taylor Otwell](https://github.com/TaylorOtwell/). Copyright © 2011-2024 Laravel LLC.
+[Laravel](https://laravel.com) is a Trademark of [Taylor Otwell](https://github.com/TaylorOtwell/). Copyright © 2011-2025 Laravel LLC.

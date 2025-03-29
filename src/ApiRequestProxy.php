@@ -64,6 +64,7 @@ class ApiRequestProxy
      */
     protected function createRequest(): PendingRequest
     {
+        /** @var \Illuminate\Http\Client\PendingRequest $request */
         $request = $this->requestFactory->baseUrl($this->api->getBaseUrl());
 
         $request = ($this->api->beforeBuild($request) ?? $request)
@@ -141,8 +142,7 @@ class ApiRequestProxy
     {
         // If any parameter requires the Pending Request, add it and stop checking the rest.
         foreach ((new ReflectionMethod($this->api, $method))->getParameters() as $key => $parameter) {
-            // @phpstan-ignore-next-line
-            if ($parameter->getType()?->getName() === PendingRequest::class) {
+            if ($parameter->getType()?->getName() === PendingRequest::class) { // @phpstan-ignore-line
                 array_splice($parameters, $key, 0, [$this->getApiRequest()]);
 
                 break;
@@ -167,7 +167,6 @@ class ApiRequestProxy
      *
      * @param mixed  $response
      * @param string $name
-     *
      * @return mixed
      */
     protected function wrapResponse(mixed $response, string $name): mixed
@@ -217,10 +216,8 @@ class ApiRequestProxy
 
     /**
      * Handle dynamic calls to the object.
-     *
-     * @return static|\GuzzleHttp\Promise\PromiseInterface|\Illuminate\Http\Client\PendingRequest|\Illuminate\Http\Client\Response
      */
-    public function __call(string $method, array $parameters)
+    public function __call(string $method, array $parameters): mixed
     {
         // If the method exists in the API class, pass it to it.
         if (method_exists($this->api, $method)) {
