@@ -167,6 +167,7 @@ class ApiRequestProxy
      *
      * @param mixed  $response
      * @param string $name
+     *
      * @return mixed
      */
     protected function wrapResponse(mixed $response, string $name): mixed

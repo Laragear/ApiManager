@@ -495,7 +495,7 @@ class TestActionApiServer extends ApiServer
         return func_get_args();
     }
 
-    public function requestOptional(string $first, PendingRequest $second, string $third = null, string $fourth = null)
+    public function requestOptional(string $first, PendingRequest $second, ?string $third = null, ?string $fourth = null)
     {
         return func_get_args();
     }
