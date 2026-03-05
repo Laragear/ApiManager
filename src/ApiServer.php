@@ -18,70 +18,50 @@ abstract class ApiServer
      *
      * @var array{string:string}|array
      */
-    public $headers = [];
+    public array $headers = [];
 
     /**
      * The number of seconds to wait for a response.
-     *
-     * @var int|null
      */
-    public $timeout = null;
+    public ?int $timeout = null;
 
     /**
      * The list of simple actions for this API.
      *
      * @var array{string:string}|array{}
+     *
+     * @deprecated Use the `\Laragear\ApiManager\Attributes\ApiActions` attributes in the class instead.
      */
-    public $actions = [];
+    public array $actions = [];
 
     /**
      * Actions and methods to wrap into a custom response class.
      *
-     * @var array
+     * @deprecated Use the `\Laragear\ApiManager\Attributes\Response` attribute in the target method instead.
      */
-    public $responses = [];
+    public array $responses = [];
 
     /**
      * Returns the API base URL.
-     *
-     * @return string
      */
-    abstract public function getBaseUrl();
+    abstract public function getBaseUrl(): string;
 
     /**
      * Modify a pristine new Pending Request.
-     *
-     * @param \Illuminate\Http\Client\PendingRequest $request
      *
      * @return \Illuminate\Http\Client\PendingRequest|null|void
      */
     public function beforeBuild(PendingRequest $request)
     {
-        return $this->build($request);
+        //
     }
 
     /**
      * Modify Pending Request after its bootstrapped.
      *
-     * @param \Illuminate\Http\Client\PendingRequest $request
-     *
      * @return \Illuminate\Http\Client\PendingRequest|null|void
      */
     public function afterBuild(PendingRequest $request)
-    {
-        //
-    }
-
-    /**
-     * Build the pending request for this API.
-     *
-     * @deprecated Use `afterBuild()` instead.
-     *
-     * @param \Illuminate\Http\Client\PendingRequest $request
-     *
-     * @return \Illuminate\Http\Client\PendingRequest|null|void
-     */
-    public function build(PendingRequest $request)
     {
         //
     }

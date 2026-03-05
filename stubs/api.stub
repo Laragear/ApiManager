@@ -3,7 +3,10 @@
 namespace {{ namespace }};
 
 use Laragear\ApiManager\ApiServer;
+use Laragear\ApiManager\Attributes\Action;
 
+#[Action('latest', '/')]
+#[Action('create', 'post', 'new')]
 class DummyClass extends ApiServer
 {
     /**
@@ -11,18 +14,8 @@ class DummyClass extends ApiServer
      *
      * @var array|array{string:string}
      */
-    public $headers = [
+    public array $headers = [
         // 'X-Requested-With' => 'Laragear Api Manager'
-    ];
-
-    /**
-     * The list of simple actions for this API.
-     *
-     * @var array|string[]
-     */
-    public $actions = [
-        'latest' => '/',
-        'create' => 'post:new',
     ];
 
     /**
@@ -30,7 +23,7 @@ class DummyClass extends ApiServer
      *
      * @return string
      */
-    public function getBaseUrl()
+    public function getBaseUrl(): string
     {
         return app()->isProduction()
             ? 'https://dummy-class.com/api/v1'
@@ -40,7 +33,7 @@ class DummyClass extends ApiServer
     /**
      * Returns the Bearer Token used for authentication.
      *
-     * @return string|array
+     * @return string|void
      */
     public function authToken()
     {

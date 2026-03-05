@@ -9,6 +9,7 @@ use Illuminate\Http\Client\Pool;
 use Illuminate\Http\Client\Request;
 use Illuminate\Support\Facades\Http;
 use Laragear\ApiManager\ApiServer;
+use Laragear\ApiManager\Attributes\Action;
 use LogicException;
 use PHPUnit\Framework\Attributes\Test;
 
@@ -55,22 +56,6 @@ class ApiRequestProxyTest extends TestCase
         Http::assertSent(static function (Request $request): bool {
             static::assertSame('https://www.test.com/example', $request->url());
             static::assertTrue($request->hasHeader('Host', ['www.test.com']));
-            static::assertCount(2, $request->headers());
-
-            return true;
-        });
-    }
-
-    #[Test]
-    public function builds_custom_request(): void
-    {
-        Http::fake();
-
-        TestBuildApiServer::api()->get('example');
-
-        Http::assertSent(static function (Request $request): bool {
-            static::assertSame('https://www.not-test.com/example', $request->url());
-            static::assertTrue($request->hasHeader('Host', ['www.not-test.com']));
             static::assertCount(2, $request->headers());
 
             return true;
@@ -289,6 +274,14 @@ class ApiRequestProxyTest extends TestCase
 
             return true;
         });
+
+        TestAuthApiServer::api()->useAuth('basic', ['user' => 'pass'])->get('test');
+
+        Http::assertSent(static function (Request $request): bool {
+            static::assertSame(['Basic dXNlcjpwYXNz'], $request->header('Authorization'));
+
+            return true;
+        });
     }
 
     #[Test]
@@ -443,14 +436,22 @@ class TestPropertiesApiServer extends ApiServer
         return  'https://www.properties.com';
     }
 
-    public $headers = ['X-Foo' => 'bar'];
+    public array$headers = ['X-Foo' => 'bar'];
 
-    public $timeout = 10;
+    public ?int $timeout = 10;
 }
 
+#[Action('foo', 'foo/action')]
+#[Action('bar', 'get', 'bar/action')]
+#[Action('bazQuz', 'post', 'baz/quz')]
+#[Action('parameter', 'post', 'baz/quz/{id}')]
+#[Action('invalid', 'invalid', '/something')]
+#[Action('hacky', 'baseUrl', 'www.google.com')]
+#[Action('override', 'get', '/not-overridden')]
+#[Action('asProperty', 'get', '/not-overridden-property')]
 class TestActionApiServer extends ApiServer
 {
-    public $url;
+    public string $url;
 
     public function setBaseUrl(string $url)
     {
@@ -463,17 +464,6 @@ class TestActionApiServer extends ApiServer
     {
         return $this->url ?? 'https://www.test.com';
     }
-
-    public $actions = [
-        'foo'         => 'foo/action',
-        'bar'         => 'get:bar/action',
-        'baz quz'     => 'post:baz/quz',
-        'parameter'   => 'post:baz/quz/{id}',
-        'invalid'     => 'invalid:/something',
-        'hacky'       => 'baseUrl:www.google.com',
-        'override'    => 'get:/not-overridden',
-        'as property' => 'get:/not-overridden-property',
-    ];
 
     public function override(PendingRequest $request, string $message)
     {
@@ -556,11 +546,11 @@ class TestAuthApiServer extends TestActionApiServer
 
 class TestAuthWrapRequestServerMethod extends ApiServer
 {
-    public $responses = [
+    public array $responses = [
         'example' => Fixtures\CustomResponse::class,
     ];
 
-    public function getBaseUrl()
+    public function getBaseUrl(): string
     {
         return 'https://www.test.com';
     }
@@ -571,17 +561,13 @@ class TestAuthWrapRequestServerMethod extends ApiServer
     }
 }
 
+/**
+ * @method \Illuminate\Http\Client\Response example()
+ */
+#[Action('example', '200', response: Fixtures\CustomResponse::class)]
 class TestAuthWrapRequestServerAction extends ApiServer
 {
-    public $actions = [
-        'example' => '200',
-    ];
-
-    public $responses = [
-        'example' => Fixtures\CustomResponse::class,
-    ];
-
-    public function getBaseUrl()
+    public function getBaseUrl(): string
     {
         return 'https://www.test.com';
     }

@@ -22,7 +22,8 @@ Your support allows me to keep this package free, up-to-date and maintainable. A
 
 ## Requirements
 
-* Laravel 11 or later
+* PHP 8.3 or later
+* Laravel 12 or later
 
 ## Installation
 
@@ -48,7 +49,10 @@ You will receive a file with a base URL and actions, and space to add some heade
 namespace App\Http\Apis;
 
 use Laragear\ApiManager\ApiServer;
+use Laragear\ApiManager\Attributes\Action;
 
+#[Action('latest', '/')]
+#[Action('create', 'post', 'new')]
 class Chirper extends ApiServer
 {
     /**
@@ -56,26 +60,14 @@ class Chirper extends ApiServer
      *
      * @var array{string:string}|array
      */
-    public $headers = [
+    public array $headers = [
         // ...
     ];
     
     /**
-     * The list of simple actions for this API.
-     *
-     * @var array|string[]
-     */
-    public $actions = [
-        'latest' => '/',
-        'create' => 'post:new',
-    ];
-
-    /**
      * Returns the API base URL.
-     *
-     * @return string
      */
-    public function getBaseUrl()
+    public function getBaseUrl(): string
     {
         return app()->isProduction()
             ? 'https://chirper.com/api/v1'
@@ -84,10 +76,8 @@ class Chirper extends ApiServer
      
      /**
       * Returns the Bearer Token used for authentication. 
-      * 
-      * @return string
       */
-     protected function authToken()
+     protected function authToken(): string
      {
          return config('services.chirper.secret');
      }
@@ -102,43 +92,42 @@ class Chirper extends ApiServer
 
 Setting actions in the API class solves the problem of having multiple endpoints and preparing each one every time across your application, which can led to errors or convoluted functions full of text.
 
-The easiest way to define actions is to use the `$actions` array using the syntax `verb:route/{parameters}`, being the key the action name you will invoke later. If you don't define a verb, `get` will be inferred.
+The easiest way to define actions is to use the `Laragear\ApiManager\Attributes\Action` attribute on top of the class with the action name in camelCase (like it was a class method), and the URL path. You may also set the HTTP verb to use, otherwise `get` will be inferred. 
 
 ```php
-/**
- * The list of simple actions for this API.
- * 
- * @var array|string[]  
- */
-protected $actions = [
-    'new chirp' => 'post:new',
-    'latest'    => 'latest',
-    'view'      => 'chirp/{id}',
-    'edit'      => 'update:chirp/{id}',
-    'delete'    => 'delete:chirp/{id}',
-];
-```
+namespace App\Http\Apis;
 
-For example, to update a chirp, we could call `edit` directly from our `ChirpApi`.
-
-While you're at it, add the PHPDoc manually to your API Server to take advantage of autocompletion (intellisense).
-
-```php
 use Laragear\ApiManager\ApiServer;
+use Laragear\ApiManager\Attributes\Action;
 
-/**
- * @method \Illuminate\Http\Client\Response newChirp($data = [])
- * @property-read \Illuminate\Http\Client\Response $latest
- * @property-read  \Illuminate\Http\Client\Response $view
- * @method \Illuminate\Http\Client\Response edit($data = [])
- */
+#[Action('newChirp', 'post', 'new')]
+#[Action('latest', 'latest')]
+#[Action('view', 'chirp/{id}')]
+#[Action('edit', 'update', 'chirp/{id}')]
+#[Action('delete', 'delete', 'chirp/{id}')]
 class Chirper extends ApiServer
 {
     // ...
 }
 ```
 
-Then, call the action name in _camelCase_ notation. Arguments will be passed down to the HTTP Request.
+For example, to see the latest chirp on the server, we could call `latest` directly from our `ChirpApi`.
+
+```php
+use App\Http\Apis\Chirper;
+
+$latestChirps = Chirper::api()->latest();
+```
+
+Alternatively, you can call an action without arguments as it were a property, especially if just a `GET` method over the server.
+
+```php
+use App\Http\Apis\Chirper;
+
+$latestChirps = Chirper::api()->latest;
+```
+
+When calling an action that requires parameters, the arguments will be passed down to the HTTP Request as part of the body.
 
 ```php
 use App\Http\Apis\Chirper;
@@ -147,7 +136,7 @@ use App\Http\Apis\Chirper;
 $chirp = Chirper::api()->newChirp(['message' => 'This should be complex']);
 ```
 
-If the route has named parameters, you can set them as arguments when invoking the server.
+If the route has named parameters, lile `chirp/{id}`, you can set them as arguments when invoking the server.
 
 ```php
 use App\Http\Apis\Chirper;
@@ -159,17 +148,38 @@ Chirper::api(['id' => 231])->edit(['message' => 'No, it was a breeze!']);
 Chirper::api('chirper')->withUrlParameters(['id' => 231])->edit(['message' => 'No, it was a breeze!']);
 ```
 
-Also, you can call an action without arguments as it were a property.
+While you're at it, add the PHPDoc manually to your API Server to take advantage of autocompletion in your IDE (intellisense).
 
 ```php
-use App\Http\Apis\Chirper;
+use Laragear\ApiManager\ApiServer;
+use Laragear\ApiManager\Attributes\Action;
 
-$latestChirps = Chirper::api()->latest;
+/**
+ * @method \Illuminate\Http\Client\Response newChirp($data = [])
+ * @property-read \Illuminate\Http\Client\Response $latest
+ * @property-read  \Illuminate\Http\Client\Response $view
+ * @method \Illuminate\Http\Client\Response edit($data = [])
+ * @method \Illuminate\Http\Client\Response delete()
+ */
+ 
+#[Action('newChirp', 'post', 'new')]
+#[Action('latest', 'latest')]
+#[Action('view', 'chirp/{id}')]
+#[Action('edit', 'update', 'chirp/{id}')]
+#[Action('delete', 'delete', 'chirp/{id}')]
+class Chirper extends ApiServer
+{
+    // ...
+}
 ```
+
+> [!NOTE]
+> 
+> You can still use the old way of using the `$actions` array, but is being deprecated.
 
 ### Method actions
 
-For more complex scenarios, you may use a class methods. Just be sure to type-hint the `PendingRequest` on any parameter if you need to customize the request.
+For more complex scenarios, you may use a class method. Just be sure to type-hint the `PendingRequest` on any parameter if you need to customize the request.
 
 ```php
 use Illuminate\Http\Client\PendingRequest;
@@ -187,7 +197,7 @@ public function noReply(PendingRequest $request)
 }
 ```
 
-Then later, you can invoke the class methods like any monday morning.
+Then later, you can invoke the class methods like any Monday morning.
 
 ```php
 use App\Http\Apis\Chirper;
@@ -209,34 +219,34 @@ $latest = Chirper::api()->noReply->newChirp('Easy peasy');
 
 ### Authentication
 
-An API Server supports the [three types of authentication of the HTTP Client in Laravel](https://laravel.com/docs/11.x/http-client#authentication): Basic, Digest and Bearer Token. You may define each of them as an array of username and password using `authBasic()` or `authDigest()`, and `authToken()` with the token, respectively.
+An API Server supports the [three kinds authentication of the HTTP Client in Laravel](https://laravel.com/docs/11.x/http-client#authentication): Basic, Digest and Bearer Token. You may define each of them as an array of username and password using `authBasic()` or `authDigest()`, and `authToken()` with the token, respectively.
 
 ```php
 /**
  * Returns the Basic Authentication to use against the API.
  * 
- * @var array{string:string}|void
+ * @var array{string, string}|array<string>|void
  */
-public function authBasic()
+public function authBasic(): array
 {
     return app()->isProduction()
-        ? ['app@chirper.com', 'real-password']
-        : ['dev@chirper.com', 'fake-password'];
+        ? ['app@chirper.com' => 'real-password']
+        : ['dev@chirper.com' => 'fake-password'];
 }
 ```
 
 > [!WARNING]
 > 
-> Don't use an associative array to match the underlying methods. Since [Laravel doesn't warranty consistency on named arguments](https://laravel.com/docs/11.x/releases#named-arguments), you should opt for simple arrays.
+> Don't use an associative array to match the underlying methods. Since [Laravel doesn't warranty consistency on named arguments](https://laravel.com/docs/11.x/releases#named-arguments), you should opt for simple arrays or `key => value`.
 > 
 > ```php
-> // This is supported, but discouraged!
+> // This is still supported, but discouraged!
 > return ['username' => 'app@chirper', 'password' => 'real-password'];
 > ```
 
-### Before & After building a requests
+### Before & After building a request
 
-You have the option to modify the request before and after it's bootstrapped using the `beforeBuild()` and `afterBuild()` respectively. The `beforeBuild()` is executed after the `PendingRequest` instance receives the base URL, and the `afterBuild()` is called after the headers and authentication are incorporated.
+You can modify the request before and after it's bootstrapped using the `beforeBuild()` and `afterBuild()` respectively. The `beforeBuild()` is executed after the `PendingRequest` instance receives the base URL, and the `afterBuild()` is called after the headers and authentication are incorporated.
 
 ```php
 use Illuminate\Http\Client\PendingRequest;
@@ -253,10 +263,6 @@ public function afterBuild(PendingRequest $request)
 ```
 
 You're free here to tap into the request instance and modify it for all endpoints, or return an entirely new `PendingRequest` instance.
-
-> [!TIP]
-> 
-> If you're using the old `build()` method from previous versions, it will still work since the `beforeBuild()` will call to `build()`.
 
 ### Overriding a request
 
@@ -343,7 +349,7 @@ return $responses['first']->ok();
 
 ### Wrapping into custom responses
 
-You may find yourself receiving a response and having to map the data to your own class manually. Instead of juggling your way to do that, you can automatically wrap the incoming response into a custom "API Response". 
+You may find yourself receiving a response and having to map the data to your own class manually for convenience. Instead of juggling your way to do that, you can automatically wrap the incoming response into a custom "API Response." 
 
 First, create a custom response for an api using `make:api-response`, the API you want to use, and name the custom response with the same name of the endpoint. Ideally, you would want to name it the same as the action or method you plan to use it for. 
 
@@ -351,7 +357,7 @@ First, create a custom response for an api using `make:api-response`, the API yo
 php artisan make:api-response Chirper ViewResponse
 ```
 
-You will receive a file like this:
+You will receive a file in `App\Http\Apis\{ApiServer}\Responses` like this:
 
 ```php
 namespace App\Http\Apis\Chirper\Responses;
@@ -371,24 +377,33 @@ class ViewResponse extends Response
 In this class you can make any method you want. Since your class will extend the base [Laravel HTTP Client](https://laravel.com/docs/11.x/http-client) `Response` class, you will have access to all its convenient methods. 
 
 ```php
-public function isPrivate(): bool
+class ViewResponse extends Response
 {
-    return $this->json('metadata.is_private', false)
+    /**
+     * Determine if the chirp is private.
+     */
+    public function isPrivate(): bool
+    {
+        return $this->json('metadata.is_private', false)
+    }
 }
 ```
 
-Once you finish up customizing your custom API Response, you may map it to the actions and methods using the `$responses` array of your Api class.
+Once you finish up customizing your custom API Response, you may set the `Laragear\ApiManager\Attributes\Response` attribute with the response class name on top of your method.
 
 ```php
-/**
- * Actions and methods to wrap into a custom response class. 
- * 
- * @var array<string, class-string>  
- */
-protected $responses = [
-    'view' => Responses\ViewResponse::class,
-];
+use Laragear\ApiManager\Attributes\Response;
+
+#[Response(Responses\ViewResponse::class)]
+public function view()
+{
+    //...
+}
 ```
+
+> [!NOTE]
+> 
+> You can still use the old `$responses` array to map custom Responses to your method, but is being deprecated.
 
 This will enable the API Manager to wrap the response into your own every time you call that method to receive a response. For example, if you call `view()`, you will receive a new `ViewResponse` instance.
 
@@ -408,7 +423,7 @@ if ($chirp->successful() && $chirp->isPrivate()) {
 
 ## Testing
 
-You can easily test if an API Server action works or not by using [the `fake()` method of the HTTP facade](https://laravel.com/docs/11.x/http-client#testing).
+You can test if an API Server action works or not by using [the `fake()` method of the HTTP facade](https://laravel.com/docs/11.x/http-client#testing).
 
 ```php
 use Illuminate\Support\Facades\Http;
@@ -439,10 +454,10 @@ There should be no problems using this package with Laravel Octane.
 
 ## Security
 
-If you discover any security related issues, please [use the online form](https://github.com/Laragear/ApiManager/security).
+If you discover any security-related issues, please [use the online form](https://github.com/Laragear/ApiManager/security).
 
 # License
 
-This specific package version is licensed under the terms of the [MIT License](LICENSE.md), at time of publishing.
+This specific package version is licensed under the terms of the [MIT License](LICENSE.md), at the time of publishing.
 
-[Laravel](https://laravel.com) is a Trademark of [Taylor Otwell](https://github.com/TaylorOtwell/). Copyright © 2011-2025 Laravel LLC.
+[Laravel](https://laravel.com) is a Trademark of [Taylor Otwell](https://github.com/TaylorOtwell/). Copyright © 2011–2026 Laravel LLC.

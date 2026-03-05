@@ -11,10 +11,13 @@ use Illuminate\Http\Client\Response;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
 use Illuminate\Support\Traits\ForwardsCalls;
+use Laragear\ApiManager\Attributes\Action;
 use LogicException;
 use ReflectionMethod;
+use ReflectionObject;
 use ReflectionProperty;
-
+use function array_is_list;
+use function array_key_first;
 use function array_merge;
 use function array_splice;
 use function class_basename;
@@ -42,7 +45,7 @@ class ApiRequestProxy
     /**
      * Create a new Api Request instance.
      */
-    public function __construct(protected Factory $requestFactory, public ApiServer $api)
+    public function __construct(protected Factory $requestFactory, public readonly ApiServer $api)
     {
         if (!$this->api->getBaseUrl()) {
             throw new LogicException('There is no base URL for this ['.class_basename($api).'] API.');
@@ -59,8 +62,6 @@ class ApiRequestProxy
 
     /**
      * Creates a new request.
-     *
-     * @return \Illuminate\Http\Client\PendingRequest
      */
     protected function createRequest(): PendingRequest
     {
@@ -73,6 +74,10 @@ class ApiRequestProxy
             ->when(
                 $this->api->authBasic(),
                 static function (PendingRequest $request, array $auth): PendingRequest {
+                    if (!array_is_list($auth) && !isset($auth['username']) && !isset($auth['password'])) {
+                        $auth = [array_key_first($auth), $auth[array_key_first($auth)]];
+                    }
+
                     return $request->withBasicAuth(...$auth);
                 }
             )
@@ -100,8 +105,7 @@ class ApiRequestProxy
     public function on(Pool $pool, ?string $as = null): static
     {
         // We will have to retrieve by force the pool values.
-        // @phpstan-ignore-next-line
-        $handler = tap(new ReflectionProperty($pool, 'handler'))->setAccessible(true)->getValue($pool);
+        $handler = (new ReflectionProperty($pool, 'handler'))->getValue($pool);
         $requests = (new ReflectionProperty($pool, 'pool'));
 
         $request = $this->getApiRequest()->setHandler($handler)->async();
@@ -109,8 +113,7 @@ class ApiRequestProxy
         // If it's using a name, set it here.
         $value = $as ? [$as => $request] : [$request];
 
-        // @phpstan-ignore-next-line
-        $requests->setValue($pool, array_merge(tap($requests)->setAccessible(true)->getValue($pool), $value));
+        $requests->setValue($pool, array_merge($pool->getRequests(), $value));
 
         return $this;
     }
@@ -122,6 +125,16 @@ class ApiRequestProxy
      */
     protected function findApiAction(string $name): ?string
     {
+        // Check first if there are attributes for the actions.
+        foreach ((new ReflectionObject($this->api))->getAttributes(Action::class) as $attribute) {
+            $action = $attribute->newInstance();
+
+            if ($action->name === $name) {
+                return $action->method.':'.$action->path;
+            }
+        }
+
+        // Fallback to the array.
         if (isset($this->api->actions[$name])) {
             return $this->api->actions[$name];
         }
@@ -137,6 +150,8 @@ class ApiRequestProxy
 
     /**
      * Executes the API class method, optionally passing the request if needed.
+     *
+     * @internal
      */
     protected function executeApiMethod(string $name, string $method, array $parameters): mixed
     {
@@ -154,6 +169,8 @@ class ApiRequestProxy
 
     /**
      * Executes a pre-defined short action.
+     *
+     * @internal
      */
     protected function executeApiAction(string $name, string $action, array $parameters): mixed
     {
@@ -165,10 +182,7 @@ class ApiRequestProxy
     /**
      * Wrap the response or promise into a custom response if found.
      *
-     * @param mixed  $response
-     * @param string $name
-     *
-     * @return mixed
+     * @internal
      */
     protected function wrapResponse(mixed $response, string $name): mixed
     {
@@ -191,14 +205,38 @@ class ApiRequestProxy
      * Retrieves the class Response for this action.
      *
      * @return class-string<\Illuminate\Http\Client\Response>|null
+     *
+     * @internal
      */
     protected function findClassResponse(string $action): ?string
     {
+        $reflection = new ReflectionObject($this->api);
+
+        // If there is an action of the same name, use that.
+        foreach ($reflection->getAttributes(Action::class) as $attribute) {
+            /** @var \Laragear\ApiManager\Attributes\Action $instance */
+            $instance = $attribute->newInstance();
+
+            if ($instance->name === $action && $instance->response) {
+                return $instance->response;
+            }
+        }
+
+        if ($reflection->hasMethod($action)) {
+            $attributes = $reflection->getMethod($action)->getAttributes(Response::class);
+
+            if (isset($attributes[0])) {
+                return $attributes[0]->newInstance()->class; // @phpstan-ignore-line
+            }
+        }
+
         return Arr::get($this->api->responses, Str::camel($action));
     }
 
     /**
      * Proxy accessing an attribute onto the API instance.
+     *
+     * @internal
      */
     public function __get(string $name): mixed
     {
@@ -217,6 +255,8 @@ class ApiRequestProxy
 
     /**
      * Handle dynamic calls to the object.
+     *
+     * @internal
      */
     public function __call(string $method, array $parameters): mixed
     {
