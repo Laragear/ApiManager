@@ -16,6 +16,7 @@ use LogicException;
 use ReflectionMethod;
 use ReflectionObject;
 use ReflectionProperty;
+
 use function array_is_list;
 use function array_key_first;
 use function array_merge;
