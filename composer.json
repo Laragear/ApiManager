@@ -21,7 +21,7 @@
     ],
     "require": {
         "php": "^8.3",
-        "guzzlehttp/guzzle": "^7.10",
+        "guzzlehttp/guzzle": "^7.10 || ^8.0",
         "illuminate/http": "12.*|13.*",
         "illuminate/config": "12.*|13.*",
         "illuminate/container": "12.*|13.*",
